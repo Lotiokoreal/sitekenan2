@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include 'config.php'; // Assurez-vous que ce fichier contient les informations de connexion à la base de données
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Préparation de la requête SQL
-    $stmt = $conn->prepare("SELECT password FROM utilisateurs WHERE username = ?");
+    $stmt = $conn->prepare("SELECT id, username, password FROM utilisateurs WHERE username = ?");
     if ($stmt === false) {
         die("Erreur de préparation de la requête : " . $conn->error);
     }
@@ -25,14 +25,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Vérification si l'utilisateur existe
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($hashed_password);
+        $stmt->bind_result($user_id, $db_username, $hashed_password);
         $stmt->fetch();
 
         // Vérification du mot de passe
         if (password_verify($password, $hashed_password)) {
             // Mot de passe correct
-            $_SESSION['username'] = $username;
+            $_SESSION['user_id'] = $user_id; // Stocker l'ID de l'utilisateur en session est souvent plus sûr que le nom d'utilisateur
+            $_SESSION['username'] = $db_username;
+            $stmt->close();
+            $conn->close();
             header('Location: accueil.php');
+            exit();
         } else {
             // Mot de passe incorrect
             echo "Identifiants incorrects.";

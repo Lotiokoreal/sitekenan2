@@ -11,39 +11,43 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Vérifier la connexion
 if ($conn->connect_error) {
-    die("La connexion a échoué: " . $conn->connect_error);
+    die("La connexion a échoué. Veuillez réessayer plus tard.");
 }
 
-if (isset($_SESSION['username'])) {
-    $username_actuelle = $_SESSION['username'];
-} else {
-    $username_actuelle = '';
-}
+// Vérifier si l'utilisateur est connecté
+$username_actuelle = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 
 // Récupérer le texte de la base de données
-$sql = "SELECT content FROM site_content WHERE section = 'main_text'";
-$result = $conn->query($sql);
+$stmt = $conn->prepare("SELECT content FROM site_content WHERE section = ?");
+$section = 'main_text';
+$stmt->bind_param("s", $section);
+$stmt->execute();
+$stmt->bind_result($main_text);
+$stmt->fetch();
+$stmt->close();
 
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $main_text = $row['content'];
-} else {
+if (empty($main_text)) {
     $main_text = "Texte non trouvé.";
 }
 
-// Mettre à jour le texte si le formulaire est soumis
-if (isset($_POST['update_text']) && isset($_SESSION['username']) && $_SESSION['username'] == 'Lotioko') {
-    $new_text = $conn->real_escape_string($_POST['main_text']);
-    $sql = "UPDATE site_content SET content = '$new_text' WHERE section = 'main_text'";
-    if ($conn->query($sql) === TRUE) {
+// Mettre à jour le texte si le formulaire est soumis et que l'utilisateur est authentifié
+if (isset($_POST['update_text']) && $username_actuelle === 'Lotioko') {
+    $new_text = $_POST['main_text'];
+
+    $stmt = $conn->prepare("UPDATE site_content SET content = ? WHERE section = ?");
+    $stmt->bind_param("ss", $new_text, $section);
+
+    if ($stmt->execute()) {
         $main_text = $new_text;
     } else {
-        echo "Erreur de mise à jour: " . $conn->error;
+        echo "Erreur de mise à jour. Veuillez réessayer plus tard.";
     }
+    $stmt->close();
 }
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">

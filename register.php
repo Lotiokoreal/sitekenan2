@@ -6,7 +6,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
     $email = $_POST['email'];
 
-    // Hachage du mot de passe
+    // Vérification des entrées
+    if (empty($username) || empty($password) || empty($email)) {
+        die("Tous les champs doivent être remplis.");
+    }
+
+    // Hachage sécurisé du mot de passe
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Connexion à la base de données
@@ -17,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die("Connexion échouée : " . $conn->connect_error);
     }
 
-    // Préparation de la requête SQL
+    // Préparation de la requête SQL avec une insertion sécurisée
     $stmt = $conn->prepare("INSERT INTO utilisateurs (username, password, email) VALUES (?, ?, ?)");
     if ($stmt === false) {
         die("Erreur de préparation de la requête : " . $conn->error);
@@ -26,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Exécution de la requête et vérification
     if ($stmt->execute()) {
-        echo "Inscription réussie !";
+        header('Location: accueil.php');
     } else {
         echo "Erreur lors de l'inscription : " . $stmt->error;
     }
