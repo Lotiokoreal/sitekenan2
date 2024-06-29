@@ -65,8 +65,6 @@ if (isset($_POST['update_text']) && isset($_SESSION['username']) && $_SESSION['u
     }
     $stmt->close();
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
