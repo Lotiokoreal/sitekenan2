@@ -19,8 +19,18 @@ CREATE TABLE site_content (
 INSERT INTO site_content (section, content) VALUES ('main_text', "Pendant mon stage à l'ESIEA, j'ai créé un site web avec HTML, CSS et JavaScript. J'ai utilisé HTML pour structurer le site,
                 CSS pour la personnalisation et pour le rendre plus responsive, puis JavaScript pour ajouter des fonctionnalités interactives.
                 Ce stage m'a permis de comprendre la construction d'un site web et son fonctionnement.
-                Grâce à cela, j'ai pu créer un site web sympa et compact."'),
+                Grâce à cela, j'ai pu créer un site web sympa et compact."),
                 ('propos', "test");
 
-INSERT INTO utilisateurs (username, password, email)
-VALUES ('kenan', '$2y$10$RuGJUfGRGPR4xN4gYDZK3uDsbmQDRwAkLqNYI.WW/qC6Bn3dz1i7O', 'kenan@example.com');
+ALTER TABLE utilisateurs ADD COLUMN last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+CREATE TABLE IF NOT EXISTS connexions (
+                                          id INT AUTO_INCREMENT PRIMARY KEY,
+                                          user_id INT,
+                                          login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          FOREIGN KEY (user_id) REFERENCES utilisateurs(id)
+);
+CREATE TABLE IF NOT EXISTS page_clicks (
+                                           id INT AUTO_INCREMENT PRIMARY KEY,
+                                           page VARCHAR(50),
+                                           click_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
